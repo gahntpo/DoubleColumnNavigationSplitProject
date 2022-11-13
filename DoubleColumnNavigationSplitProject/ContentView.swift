@@ -8,14 +8,31 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    @StateObject var dataManager = ModelDataManager()
+    @StateObject var navigationStateManager = NavigationStateManager()
+    
+    @SceneStorage("navigationState") var navigationStateData: Data?
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+        NavigationSplitView {
+            SidebarView()
+        } detail: {
+            DetailView()
         }
-        .padding()
+        
+        .environmentObject(dataManager)
+        .environmentObject(navigationStateManager)
+        
+        .onAppear {
+            //reset during launch
+            navigationStateManager.data = navigationStateData
+        }
+        .onReceive(navigationStateManager.$selectionState.dropFirst()) { _ in
+            // save state to usedefaults
+            navigationStateData = navigationStateManager.data
+        }
+        
     }
 }
 
